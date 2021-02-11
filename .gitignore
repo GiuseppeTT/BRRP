@@ -1,0 +1,11 @@
+# R/Rstudio default ignore
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Secret environment variables
+.Renviron
+
+# Data
+*.xlsx
