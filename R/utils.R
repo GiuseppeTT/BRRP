@@ -1,31 +1,35 @@
-filter_asset <- function(
-    data,
-    assets
+base_theme <- function(
+    # Empty
 ) {
-    data %>%
-        filter(asset %in% assets) %>%
-        mutate(asset = factor(asset, assets)) %>%
-        enforce_common_range(date, by = asset) %>%
+    return(list(
+        scale_size_manual(values = c("Benchmark" = 2, "Simple asset" = 0.5, "Portfolio" = 2)),
+        scale_linetype_manual(values = c("Benchmark" = "dashed", "Simple asset" = "solid", "Portfolio" = "solid")),
+        theme_bw(base_size = 16),
+        theme(legend.position = "none")
+    ))
+}
+
+`%outside%` <- function(
+    x,
+    y
+) {
+    x %>%
+        `%in%`(y) %>%
+        magrittr::not() %>%
         return()
 }
 
-enforce_common_range <- function(
-    data,
-    variable,
-    by
+humanize_column_names <- function(
+    data
 ) {
-    common_range <-
+    humane_column_names <-
         data %>%
-        group_by({{by}}) %>%
-        summarise(min_var = min({{variable}}), max_var = max({{variable}})) %>%
-        summarise(min = max(min_var), max = min(max_var)) %>%
-        as.list()
+        colnames() %>%
+        humanize_string()
 
-    data <-
-        data %>%
-        filter(common_range$min <= {{variable}}, {{variable}} <= common_range$max)
-
-    return(data)
+    data %>%
+        magrittr::set_colnames(humane_column_names) %>%
+        return()
 }
 
 humanize_labs <- function(
@@ -45,7 +49,18 @@ humanize_string <- function(
     string
 ) {
     string %>%
-        stringr::str_replace_all(pattern = r"([_\.])", replacement = " ") %>%
-        stringr::str_to_sentence() %>%
+        str_replace_all(pattern = r"([_\.])", replacement = " ") %>%
+        if_else(. == str_to_upper(.), ., str_to_sentence(.)) %>%
+        return()
+}
+
+time_diff_length <- function(
+    date,
+    unit = "second"
+) {
+    date %>%
+        range() %>%
+        diff() %>%
+        time_length(unit = unit) %>%
         return()
 }

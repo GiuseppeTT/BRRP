@@ -1,0 +1,16 @@
+Row {.tabset .tabset-fade}
+--------------------------------------------------------------------------------
+
+### Rolling year risk contribution
+```{r}
+{{analysis}} %>% 
+    magrittr::extract2("rolling_year_risk_contribution_plot") %>% 
+    plotly::ggplotly()
+```
+
+### Rolling quarter risk contribution
+```{r}
+{{analysis}} %>% 
+    magrittr::extract2("rolling_quarter_risk_contribution_plot") %>% 
+    plotly::ggplotly()
+```

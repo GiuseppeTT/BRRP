@@ -1,0 +1,130 @@
+---
+title: "Brazilian Risk Parity"
+output: 
+    flexdashboard::flex_dashboard:
+        social: menu
+        orientation: rows
+        vertical_layout: scroll
+params:
+    base_analysis_template: NULL
+    portfolio_analysis_template: NULL
+---
+
+```{r setup, include = FALSE}
+library(tidyverse)
+
+library(targets)
+
+`%>%` <- magrittr::`%>%`
+
+load_template <- function(
+    path,
+    ...
+) {
+    path %>% 
+        knitr::knit_expand(...) %>% 
+        knitr::knit_child(text = ., quiet = TRUE) %>% 
+        cat(sep = "\n")
+}
+```
+
+Bonds {data-navmenu="Asset classes"}
+================================================================================
+
+```{r, include = FALSE}
+tar_load(base_bond_analysis)
+```
+
+```{r, results = "asis"}
+load_template(params$base_analysis_template, analysis = "base_bond_analysis")
+```
+
+
+
+
+Equities {data-navmenu="Asset classes"}
+================================================================================
+
+```{r, include = FALSE}
+tar_load(base_equity_analysis)
+```
+
+```{r, results = "asis"}
+load_template(params$base_analysis_template, analysis = "base_equity_analysis")
+```
+
+
+
+
+Multi-Asset Funds {data-navmenu="Asset classes"}
+================================================================================
+
+```{r, include = FALSE}
+tar_load(base_fund_analysis)
+```
+
+```{r, results = "asis"}
+load_template(params$base_analysis_template, analysis = "base_fund_analysis")
+```
+
+
+
+
+Index Portfolio {data-navmenu="Theoretical Portfolios"}
+================================================================================
+
+```{r, include = FALSE}
+tar_load(base_index_analysis)
+```
+
+```{r, results = "asis"}
+load_template(params$base_analysis_template, analysis = "base_index_analysis")
+```
+
+```{r, results = "asis"}
+load_template(params$portfolio_analysis_template, analysis = "base_index_analysis")
+```
+
+
+
+
+Index + Darius-Sigma Portfolio {data-navmenu="Theoretical Portfolios"}
+================================================================================
+
+```{r, include = FALSE}
+tar_load(base_index_darius_sigma_analysis)
+```
+
+```{r, results = "asis"}
+load_template(params$base_analysis_template, analysis = "base_index_darius_sigma_analysis")
+```
+
+```{r, results = "asis"}
+load_template(params$portfolio_analysis_template, analysis = "base_index_darius_sigma_analysis")
+```
+
+
+
+
+Index + Zarathustra-Sigma Portfolio {data-navmenu="Theoretical Portfolios"}
+================================================================================
+
+```{r, include = FALSE}
+tar_load(base_index_zarathustra_sigma_analysis)
+```
+
+```{r, results = "asis"}
+load_template(params$base_analysis_template, analysis = "base_index_zarathustra_sigma_analysis")
+```
+
+```{r, results = "asis"}
+load_template(params$portfolio_analysis_template, analysis = "base_index_zarathustra_sigma_analysis")
+```
+
+
+
+
+Investable Portfolio
+================================================================================
+
+TODO

@@ -1,46 +1,202 @@
-# TODO: Implement plot_performance / plot_relative_price
-quick_analyze <- function(
-    data
+base_analyze <- function(
+    data,
+    assets,
+    benchmark = "CDI",
+    portfolio = NULL,
+    weights = NULL
 ) {
-    data %>%
-        metrify() %>%
-        print()
+    data <-
+        data %>%
+        filter_asset(c(benchmark, assets))
 
-    data %>%
-        plot_price() %>%
-        print()
+    if (!is.null(portfolio) & !is.null(weights)) {
+        portfolio_data <-
+            data %>%
+            filter(asset != benchmark) %>%
+            build_portfolio(portfolio, weights)
 
-    data %>%
-        plot_rolling_return(days(365)) %>%
-        print()
+        data <-
+            data %>%
+            bind_rows(portfolio_data)
+    } else if (xor(!is.null(portfolio), !is.null(weights))) {
+        stop("You must provide both or neither 'portfolio' and 'weights' arguments")
+    } else {
+        portfolio <- "" # TODO: solve this, there is a problem in case_when
+    }
 
-    print("365 days rolling return quantiles")
-    data %>%
-        table_rolling_return(days(365)) %>%
-        print()
+    data <-
+        data %>%
+        mutate(type = case_when(
+            asset ==   benchmark ~ "Benchmark",
+            asset %in% assets    ~ "Simple asset",
+            asset == portfolio   ~ "Portfolio" # TODO: Problem here with portfolio = NULL
+        )) %>%
+        mutate(asset = factor(asset, levels = c(benchmark, assets, portfolio))) %>%
+        mutate(type = factor(type, levels = c("Benchmark", "Simple asset", "Portfolio"))) %>%
+        select(type, asset, date, return) %>%
+        arrange(type, asset, date)
 
-    print("30 days rolling return quantiles")
-    data %>%
-        table_rolling_return(days(30)) %>%
-        print()
+    results <-
+        list()
 
-    print("7 days rolling return quantiles")
-    data %>%
-        table_rolling_return(days(7)) %>%
-        print()
+    results$metric_table <-
+        data %>%
+        metrify()
 
-    data %>%
-        plot_drawdown() %>%
-        print()
+    results$price_plot <-
+        data %>%
+        plot_price()
+
+    # TODO: Implement relative price
+
+    results$drawdown_plot <-
+        data %>%
+        plot_drawdown()
+
+    results$rolling_year_return_plot <-
+        data %>%
+        plot_rolling_return(days(365))
+
+    results$rolling_year_return_table <-
+        data %>%
+        table_rolling_return(days(365))
+
+    results$rolling_month_return_table <-
+        data %>%
+        table_rolling_return(days(30))
+
+    results$rolling_week_return_table <-
+        data %>%
+        table_rolling_return(days(7))
 
     # TODO: create correlation plot with dendogram
-    data %>%
-        correlate() %>%
-        print()
+    # data %>%
+    #     correlate() %>%
+    #     print()
+    #
+    # data %>%
+    #     plot_cluster() %>%
+    #     print()
 
+    if (!is.null(weights)) {
+        results$rolling_year_risk_contribution_plot <-
+            data %>%
+            plot_rolling_risk_contribution(days(365), threshold = 0.05)
+
+        results$rolling_quarter_risk_contribution_plot <-
+            data %>%
+            plot_rolling_risk_contribution(days(91), threshold = 0.05)
+    }
+
+    return(results)
+}
+
+# TODO: add benchmark and portfolio arguments
+filter_asset <- function(
+    data,
+    assets
+) {
     data %>%
-        plot_cluster() %>%
-        print()
+        filter(asset %in% assets) %>%
+        .enforce_common_range(date, by = asset) %>%
+        return()
+}
+
+.enforce_common_range <- function(
+    data,
+    variable,
+    by
+) {
+    common_range <-
+        data %>%
+        group_by({{by}}) %>%
+        summarise(min_var = min({{variable}}), max_var = max({{variable}})) %>%
+        summarise(min = max(min_var), max = min(max_var)) %>%
+        as.list()
+
+    data <-
+        data %>%
+        filter(common_range$min <= {{variable}}, {{variable}} <= common_range$max)
+
+    return(data)
+}
+
+build_portfolio <- function(
+    data,
+    portfolio,
+    weights
+) {
+    if (is.numeric(weights)) {
+        if (is.null(names(weights)))
+            stop("The 'weights' argument must be named")
+
+        assets <-
+            data %>%
+            pull(asset) %>%
+            unique()
+
+        if (length(weights) != length(assets))
+            stop("The 'weights' argument must have same length as assets")
+
+        if (any(names(weights) %outside% assets))
+            stop("The 'weights' argument names must be contained in assets")
+    } else if (weights == "inverse volatility") {
+        weights <-
+            data %>%
+            group_by(asset) %>%
+            summarise(inverse_volatility = 1 / sd(return)) %>%
+            mutate(weight = inverse_volatility / sum(inverse_volatility)) %>%
+            select(asset, weight) %>%
+            deframe()
+    } else if (weights == "risk contribution") {
+        covariances <-
+            data %>%
+            pivot_wider(names_from = asset, values_from = return) %>%
+            select(-date) %>%
+            drop_na() %>%
+            as.matrix() %>%
+            RiskPortfolios::covEstimation(control = list(type = "naive"))
+
+        weights <-
+            covariances %>%
+            RiskPortfolios::optimalPortfolio(control = list(type = "erc", constraint = "lo")) %>%
+            magrittr::set_names(rownames(covariances))
+
+    } else {
+        stop("Invalid weights value")
+    }
+
+    data <-
+        data %>%
+        complete(asset, date, fill = list(return = 0))
+
+    data <-
+        data %>%
+        group_by(asset) %>%
+        arrange(date) %>%
+        mutate(price = cumprod(1 + return)) %>%
+        ungroup()
+
+    portfolio_data <-
+        data %>%
+        group_by(date) %>%
+        arrange(positionize(asset, by = names(weights))) %>%
+        summarise(portfolio_price = sum(weights * price)) %>%
+        mutate(portfolio_return = portfolio_price / lag(portfolio_price) - 1) %>%
+        slice(-1) %>%
+        mutate(asset = portfolio) %>%
+        select(asset, date, return = portfolio_return)
+
+    return(portfolio_data)
+}
+
+positionize <- function(
+    x,
+    by
+) {
+    x %>%
+        match(by) %>%
+        return()
 }
 
 metrify <- function(
@@ -49,14 +205,15 @@ metrify <- function(
     data %>%
         group_by(asset) %>%
         summarise(
-            mean = 252 * mean(return),
-            sd = sqrt(252) * sd(return),
-            sharpe = mean / sd,
-            semi_d = sqrt(252) * semi_deviation(return),
-            sortino = mean / semi_d,
-            value = prod(1 + return),
-            max_drawdown = min(drawdown(cumprod(1 + return)))
+            CAGR               = prod(1 + return)^(252 / length(date)) - 1,
+            mean               = 252 * mean(return),
+            standard_deviation = sqrt(252) * sd(return),
+            sharpe             = mean / standard_deviation,
+            semi_deviation     = sqrt(252) * semi_deviation(return),
+            sortino            = mean / semi_deviation,
+            worst_drawdown     = min(drawdown(cumprod(1 + return)))
         ) %>%
+        humanize_column_names() %>%
         return()
 }
 
@@ -68,18 +225,12 @@ plot_price <- function(
         group_by(asset) %>%
         mutate(price = cumprod(1 + return))
 
-    label_data <-
-        data %>%
-        group_by(asset) %>%
-        filter(date == max(date))
-
     plot <-
         data %>%
         ggplot(aes(x = date, y = price, color = asset)) +
-        geom_line() +
-        geom_label_repel(aes(label = asset), data = label_data) +
-        scale_y_log10(n.breaks = 10) +
-        theme_bw(base_size = 16)
+        geom_line(aes(size = type, linetype = type)) +
+        scale_y_log10() +
+        base_theme()
 
     plot <-
         plot %>%
@@ -98,20 +249,13 @@ plot_rolling_return <- function(
         mutate(rolling_return = rolling_return(return, date, window_size)) %>%
         drop_na()
 
-    label_data <-
-        data %>%
-        group_by(asset) %>%
-        filter(date == max(date))
-
-
     plot <-
         data %>%
         ggplot(aes(x = date, y = rolling_return, color = asset)) +
-        geom_line() +
+        geom_line(aes(size = type, linetype = type)) +
         geom_hline(yintercept = 0, size = 2) +
-        geom_label_repel(aes(label = asset), data = label_data) +
-        scale_y_continuous(n.breaks = 10, labels = scales::percent) +
-        theme_bw(base_size = 16)
+        scale_y_continuous(labels = scales::percent) +
+        base_theme()
 
     plot <-
         plot %>%
@@ -131,6 +275,7 @@ table_rolling_return <- function(
         summarise(as_tibble(quantile(rolling_return, probs = probs, na.rm = T), rownames = "name")) %>%
         ungroup() %>%
         pivot_wider(names_from = name, values_from = value) %>%
+        humanize_column_names() %>%
         return()
 }
 
@@ -143,19 +288,12 @@ plot_drawdown <- function(
         mutate(price = cumprod(1 + return)) %>%
         mutate(drawdown = drawdown(price))
 
-    label_data <-
-        data %>%
-        group_by(asset) %>%
-        filter(date == max(date))
-
     plot <-
         data %>%
         ggplot(aes(x = date, y = drawdown, color = asset)) +
-        geom_line() +
-        geom_hline(yintercept = 0, size = 2) +
-        geom_label_repel(aes(label = asset), data = label_data) +
-        scale_y_continuous(n.breaks = 10, labels = scales::percent) +
-        theme_bw(base_size = 16)
+        geom_line(aes(size = type, linetype = type)) +
+        scale_y_continuous(labels = scales::percent) +
+        base_theme()
 
     plot <-
         plot %>%
@@ -195,8 +333,12 @@ plot_rolling_risk_contribution <- function(
 ) {
     data <-
         data %>%
+        filter(type %outside% c("Benchmark", "Portfolio"))
+
+    data <-
+        data %>%
         group_by(asset) %>%
-        mutate(rolling_inverse_volatility = slide_index_dbl(return, date, ~ 1 / sd(.x), .before = window_size, .complete = TRUE))
+        mutate(rolling_inverse_volatility = slider::slide_index_dbl(return, date, ~ 1 / sd(.x), .before = window_size, .complete = TRUE))
 
     data <-
         data %>%
@@ -206,19 +348,13 @@ plot_rolling_risk_contribution <- function(
         mutate(rolling_risk_contribution = if_else(rolling_risk_contribution - lag(rolling_risk_contribution) > threshold, lag(rolling_risk_contribution), rolling_risk_contribution)) %>%
         drop_na()
 
-    label_data <-
-        data %>%
-        group_by(asset) %>%
-        filter(date == max(date))
-
     plot <-
         data %>%
         ggplot(aes(x = date, y = rolling_risk_contribution , color = asset)) +
         geom_smooth(method = "lm", formula = y ~ 1, se = FALSE, linetype = "dashed") +
-        geom_line(size = 2) +
-        geom_label_repel(aes(label = asset), data = label_data) +
-        scale_y_continuous(n.breaks = 10, labels = scales::percent) +
-        theme_bw(base_size = 16)
+        geom_line(aes(size = type, linetype = type)) +
+        scale_y_continuous(labels = scales::percent) +
+        base_theme()
 
     plot <-
         plot %>%
@@ -236,24 +372,4 @@ table_risk_contribution <- function(
         mutate(risk_contribution = inverse_volatility / sum(inverse_volatility)) %>%
         select(asset, risk_contribution) %>%
         return()
-}
-
-check_risk_weights <- function(
-    data
-) {
-    covariances <-
-        data %>%
-        pivot_wider(names_from = asset, values_from = return) %>%
-        select(-date) %>%
-        drop_na() %>%
-        cov()
-
-    covariances %>%
-        RiskPortfolios::optimalPortfolio(control = list(type = "invvol")) %>%
-        print()
-
-    covariances %>%
-        RiskPortfolios::optimalPortfolio(control = list(type = "erc")) %>%
-        magrittr::set_names(rownames(covariances)) %>%
-        print()
 }
