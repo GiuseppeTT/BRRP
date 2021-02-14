@@ -7,11 +7,15 @@
 # Secret environment variables
 .Renviron
 
+# Debug
+_debug.R
+
 # Targets
 _targets/
 
 # Input
 *.xlsx
+*.ZIP
 
 # Output
 *.html

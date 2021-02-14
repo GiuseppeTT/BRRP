@@ -45,11 +45,9 @@ analyze <- function(
         data %>%
         plot_price()
 
-    # TODO: Implement relative price
-
-    results$drawdown_plot <-
+    results$relative_price_plot <-
         data %>%
-        plot_drawdown()
+        plot_relative_price()
 
     results$rolling_year_return_plot <-
         data %>%
@@ -67,14 +65,23 @@ analyze <- function(
         data %>%
         table_rolling_return(days(7))
 
-    # TODO: create correlation plot with dendogram
-    # data %>%
-    #     correlate() %>%
-    #     print()
-    #
-    # data %>%
-    #     plot_cluster() %>%
-    #     print()
+    results$drawdown_plot <-
+        data %>%
+        plot_drawdown()
+
+    # TODO: Create rolling relative return plot/tables
+
+    results$correlation_table <-
+        data %>%
+        filter(type == "Simple asset") %>%
+        select(-type) %>%
+        table_correlation()
+
+    results$dendogram_plot <-
+        data %>%
+        filter(type == "Simple asset") %>%
+        select(-type) %>%
+        plot_dendogram()
 
     if (!is.null(weights)) {
         results$rolling_year_risk_contribution_plot <-
@@ -95,6 +102,101 @@ analyze <- function(
     }
 
     return(results)
+}
+
+plot_relative_price <- function(
+    data
+) {
+    data <-
+        data %>%
+        complete(asset, date, fill = list(return = 0)) %>%
+        group_by(asset) %>%
+        mutate(type = if_else(is.na(type), most_common(type), type)) %>%
+        ungroup()
+
+    data <-
+        data %>%
+        group_by(asset) %>%
+        mutate(price = cumprod(1 + return)) %>%
+        ungroup()
+
+    benchmark_data <-
+        data %>%
+        filter(type == "Benchmark") %>%
+        select(date, benchmark_price = price)
+
+    data <-
+        data %>%
+        left_join(benchmark_data, by = "date") %>%
+        mutate(relative_price = price / benchmark_price)
+
+    plot <-
+        data %>%
+        ggplot(aes(x = date, y = relative_price, color = asset)) +
+        geom_line(aes(size = type, linetype = type)) +
+        scale_y_continuous(labels = scales::percent) +
+        base_theme()
+
+    plot <-
+        plot %>%
+        humanize_labs()
+
+    return(plot)
+}
+
+most_common <- function(
+    x
+) {
+    unique_values <-
+        x %>%
+        unique()
+
+    mode_position <-
+        x %>%
+        match(unique_values) %>%
+        tabulate() %>%
+        which.max()
+
+    mode <-
+        unique_values %>%
+        magrittr::extract(mode_position)
+
+    return(mode)
+}
+
+table_correlation <- function(
+    data
+) {
+    data %>%
+        pivot_wider(names_from = asset, values_from = return) %>%
+        select(-date) %>%
+        drop_na() %>%
+        cor() %>%
+        as_tibble(rownames = "Asset") %>%
+        return()
+}
+
+plot_dendogram <- function(
+    data
+) {
+    plot_data <-
+        data %>%
+        pivot_wider(names_from = asset, values_from = return) %>%
+        select(-date) %>%
+        drop_na() %>%
+        cor() %>%
+        dist() %>%
+        hclust() %>%
+        as.dendrogram() %>%
+        ggdendro::dendro_data(type = "rectangle")
+
+    plot <-
+        ggplot() +
+        geom_segment(aes(x = x, y = y, xend = xend, yend = yend), data = plot_data$segments) +
+        geom_text(aes(x = x, y = y, label = label), data = plot_data$labels, size = 5, nudge_y = -0.1) +
+        ggdendro::theme_dendro()
+
+    return(plot)
 }
 
 table_weights <- function(

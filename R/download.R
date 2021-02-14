@@ -56,7 +56,7 @@ download_data <- function(
     return(data)
 }
 
-# TODO: automatic download data
+# TODO: automate download process
 .download_IF_data <- function(
     # Empty
 ) {
@@ -78,4 +78,115 @@ download_data <- function(
         arrange(asset, date)
 
     return(data)
+}
+
+# TODO: automate download process
+# http://www.b3.com.br/pt_br/market-data-e-indices/servicos-de-dados/market-data/historico/mercado-a-vista/cotacoes-historicas/
+.download_B3_data <- function(
+    # Empty
+) {
+    column_positions <- fwf_cols(
+        tipreg = c(  1,   2),
+        date   = c(  3,  10),
+        codbdi = c( 11,  12),
+        codneg = c( 13,  24),
+        tpmerc = c( 25,  27),
+        nomres = c( 28,  39),
+        especi = c( 40,  49),
+        prazot = c( 50,  52),
+        modref = c( 53,  56),
+        preabe = c( 57,  69),
+        premax = c( 70,  82),
+        premin = c( 83,  95),
+        premed = c( 96, 108),
+        preult = c(109, 121),
+        preofc = c(122, 134),
+        totneg = c(148, 152),
+        quatot = c(153, 170),
+        voltot = c(171, 188),
+        preexe = c(189, 201),
+        indopc = c(202, 202),
+        datven = c(203, 210),
+        fatcot = c(211, 217),
+        ptoexe = c(218, 230),
+        cdoisi = c(231, 242),
+        dismes = c(243, 245)
+    )
+
+    column_types <- cols(
+        tipreg = col_number(),
+        date   = col_date("%Y%m%d"),
+        codbdi = col_character(),
+        codneg = col_character(),
+        tpmerc = col_number(),
+        nomres = col_character(),
+        especi = col_character(),
+        prazot = col_character(),
+        modref = col_character(),
+        preabe = col_number(),
+        premax = col_number(),
+        premin = col_number(),
+        premed = col_number(),
+        preult = col_number(),
+        preofc = col_number(),
+        totneg = col_number(),
+        quatot = col_number(),
+        voltot = col_number(),
+        preexe = col_number(),
+        indopc = col_number(),
+        datven = col_number(),
+        fatcot = col_number(),
+        ptoexe = col_number(),  # TODO: check what the fuck is "(07)V06" type
+        cdoisi = col_character(),
+        dismes = col_number()
+    )
+
+    without_decimal_columns <- c(
+        "preabe",
+        "premax",
+        "premin",
+        "premed",
+        "preult",
+        "preofc",
+        "voltot",
+        "preexe"
+    )
+
+    path <-
+        here::here("data/COTAHIST_A2021.ZIP")
+
+    line_count <-
+        path %>%
+        count_lines()
+
+    data <-
+        path %>%
+        read_fwf(column_positions, column_types, skip = 1, n_max = line_count - 1 - 1)
+
+    data <-
+        data %>%
+        mutate(across(all_of(without_decimal_columns), magrittr::divide_by, e2 = 100))
+
+    data <-
+        data %>%
+        group_by(codneg) %>%
+        arrange(date) %>%
+        mutate(return = preult / lag(preult) - 1) %>%
+        ungroup()
+
+    data <-
+        data %>%
+        select(asset = codneg, date, return) %>%
+        arrrange(date)
+
+    return(data)
+}
+
+count_lines <- function(
+    path
+) {
+    path %>%
+        read_file() %>%
+        str_count("\\n") %>%
+        return()
 }

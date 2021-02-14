@@ -20,10 +20,10 @@ Row
     plotly::ggplotly()
 ```
 
-### Drawdown
+### Relative price
 ```{r}
 {{analysis}} %>% 
-    magrittr::extract2("drawdown_plot") %>% 
+    magrittr::extract2("relative_price_plot") %>% 
     plotly::ggplotly()
 ```
 
@@ -60,4 +60,30 @@ Row {.tabset .tabset-fade}
     magrittr::extract2("rolling_week_return_table") %>% 
     mutate(across(where(is.numeric), scales::percent, accuracy = 0.1)) %>%
     knitr::kable()
+```
+
+### Drawdown
+```{r}
+{{analysis}} %>% 
+    magrittr::extract2("drawdown_plot") %>% 
+    plotly::ggplotly()
+```
+
+
+Row
+--------------------------------------------------------------------------------
+
+### Correlations
+```{r}
+{{analysis}} %>% 
+    magrittr::extract2("correlation_table") %>% 
+    mutate(across(where(is.numeric), scales::percent, accuracy = 0.1)) %>%
+    knitr::kable()
+```
+
+### Clustering
+```{r}
+{{analysis}} %>% 
+    magrittr::extract2("dendogram_plot") %>% 
+    plotly::ggplotly()
 ```
