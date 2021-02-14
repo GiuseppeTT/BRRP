@@ -54,8 +54,8 @@ list(
         )
     ),
     tar_target(
-        base_bond_analysis,
-        base_analyze(complemented_assets, assets = bonds, benchmark = benchmark)
+        bond_analysis,
+        analyze(complemented_assets, assets = bonds, benchmark = benchmark)
     ),
     ## Equities ----------------------------------------------------------------
     tar_target(
@@ -69,8 +69,8 @@ list(
         )
     ),
     tar_target(
-        base_equity_analysis,
-        base_analyze(complemented_assets, assets = equities, benchmark = benchmark)
+        equity_analysis,
+        analyze(complemented_assets, assets = equities, benchmark = benchmark)
     ),
     ## Funds -------------------------------------------------------------------
     tar_target(
@@ -82,8 +82,8 @@ list(
         )
     ),
     tar_target(
-        base_fund_analysis,
-        base_analyze(complemented_assets, assets = funds, benchmark = benchmark)
+        fund_analysis,
+        analyze(complemented_assets, assets = funds, benchmark = benchmark)
     ),
     ## Index Portfolio ---------------------------------------------------------
     tar_target(
@@ -95,13 +95,13 @@ list(
         )
     ),
     tar_target(
-        base_index_analysis,
-        base_analyze(
+        index_analysis,
+        analyze(
             complemented_assets,
             assets = indexes,
             benchmark = benchmark,
             portfolio = "Index portfolio",
-            weights = "inverse volatility"
+            weights = "naive risk contribution"
         )
     ),
     ## Index + Darius-Sigma Portfolio ------------------------------------------
@@ -115,13 +115,13 @@ list(
         )
     ),
     tar_target(
-        base_index_darius_sigma_analysis,
-        base_analyze(
+        index_darius_sigma_analysis,
+        analyze(
             complemented_assets,
             assets = indexes_darius_sigma,
             benchmark = benchmark,
             portfolio = "Index + Darius-Sigma portfolio",
-            weights = "inverse volatility"
+            weights = "naive risk contribution"
         )
     ),
     ## Index + Zarathustra-Sigma Portfolio -------------------------------------
@@ -135,13 +135,13 @@ list(
         )
     ),
     tar_target(
-        base_index_zarathustra_sigma_analysis,
-        base_analyze(
+        index_zarathustra_sigma_analysis,
+        analyze(
             complemented_assets,
             assets = indexes_zarathustra_sigma,
             benchmark = benchmark,
             portfolio = "Index + Zarathustra-Sigma portfolio",
-            weights = "inverse volatility"
+            weights = "naive risk contribution"
         )
     ),
     # Dashboard ----------------------------------------------------------------

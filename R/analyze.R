@@ -1,4 +1,4 @@
-base_analyze <- function(
+analyze <- function(
     data,
     assets,
     benchmark = "CDI",
@@ -20,16 +20,14 @@ base_analyze <- function(
             bind_rows(portfolio_data)
     } else if (xor(!is.null(portfolio), !is.null(weights))) {
         stop("You must provide both or neither 'portfolio' and 'weights' arguments")
-    } else {
-        portfolio <- "" # TODO: solve this, there is a problem in case_when
     }
 
     data <-
         data %>%
         mutate(type = case_when(
-            asset ==   benchmark ~ "Benchmark",
-            asset %in% assets    ~ "Simple asset",
-            asset == portfolio   ~ "Portfolio" # TODO: Problem here with portfolio = NULL
+            asset ==   benchmark               ~ "Benchmark",
+            asset %in% assets                  ~ "Simple asset",
+            false_if_empty(asset == portfolio) ~ "Portfolio"
         )) %>%
         mutate(asset = factor(asset, levels = c(benchmark, assets, portfolio))) %>%
         mutate(type = factor(type, levels = c("Benchmark", "Simple asset", "Portfolio"))) %>%
@@ -81,17 +79,56 @@ base_analyze <- function(
     if (!is.null(weights)) {
         results$rolling_year_risk_contribution_plot <-
             data %>%
+            filter(type == "Simple asset") %>%
             plot_rolling_risk_contribution(days(365), threshold = 0.05)
 
         results$rolling_quarter_risk_contribution_plot <-
             data %>%
+            filter(type == "Simple asset") %>%
             plot_rolling_risk_contribution(days(91), threshold = 0.05)
+
+        results$weights_table <-
+            data %>%
+            filter(type == "Simple asset") %>%
+            select(-type) %>%
+            table_weights()
     }
 
     return(results)
 }
 
-# TODO: add benchmark and portfolio arguments
+table_weights <- function(
+    data
+) {
+    naive_risk_contribution_weights <-
+        data %>%
+        compute_weights(weights_type = "naive risk contribution") %>%
+        enframe() %>%
+        rename(asset = name, naive_risk_contribution = value)
+
+    risk_contribution_weights <-
+        data %>%
+        compute_weights(weights_type = "risk contribution") %>%
+        enframe() %>%
+        rename(asset = name, risk_contribution = value)
+
+    weights <-
+        naive_risk_contribution_weights %>%
+        left_join(risk_contribution_weights, by = "asset") %>%
+        humanize_column_names()
+
+    return(weights)
+}
+
+false_if_empty <- function(
+    x
+) {
+    if (length(x) == 0)
+        return(FALSE)
+    else
+        return(x)
+}
+
 filter_asset <- function(
     data,
     assets
@@ -126,7 +163,9 @@ build_portfolio <- function(
     portfolio,
     weights
 ) {
-    if (is.numeric(weights)) {
+    if (is.character(weights)) {
+        weights <- compute_weights(data, weights)
+    } else if (is.numeric(weights)) {
         if (is.null(names(weights)))
             stop("The 'weights' argument must be named")
 
@@ -140,28 +179,6 @@ build_portfolio <- function(
 
         if (any(names(weights) %outside% assets))
             stop("The 'weights' argument names must be contained in assets")
-    } else if (weights == "inverse volatility") {
-        weights <-
-            data %>%
-            group_by(asset) %>%
-            summarise(inverse_volatility = 1 / sd(return)) %>%
-            mutate(weight = inverse_volatility / sum(inverse_volatility)) %>%
-            select(asset, weight) %>%
-            deframe()
-    } else if (weights == "risk contribution") {
-        covariances <-
-            data %>%
-            pivot_wider(names_from = asset, values_from = return) %>%
-            select(-date) %>%
-            drop_na() %>%
-            as.matrix() %>%
-            RiskPortfolios::covEstimation(control = list(type = "naive"))
-
-        weights <-
-            covariances %>%
-            RiskPortfolios::optimalPortfolio(control = list(type = "erc", constraint = "lo")) %>%
-            magrittr::set_names(rownames(covariances))
-
     } else {
         stop("Invalid weights value")
     }
@@ -188,6 +205,39 @@ build_portfolio <- function(
         select(asset, date, return = portfolio_return)
 
     return(portfolio_data)
+}
+
+compute_weights <- function(
+    data,
+    weights_type
+) {
+    if (weights_type == "naive risk contribution") {
+        weights <-
+            data %>%
+            group_by(asset) %>%
+            summarise(inverse_volatility = 1 / sd(return)) %>%
+            mutate(weight = inverse_volatility / sum(inverse_volatility)) %>%
+            select(asset, weight) %>%
+            deframe()
+    } else if (weights_type == "risk contribution") {
+        covariances <-
+            data %>%
+            pivot_wider(names_from = asset, values_from = return) %>%
+            select(-date) %>%
+            drop_na() %>%
+            as.matrix() %>%
+            RiskPortfolios::covEstimation(control = list(type = "naive"))
+
+        weights <-
+            covariances %>%
+            RiskPortfolios::optimalPortfolio(control = list(type = "erc", constraint = "lo")) %>%
+            magrittr::set_names(rownames(covariances))
+
+    } else {
+        stop("Invalid weights value")
+    }
+
+    return(weights)
 }
 
 positionize <- function(
@@ -331,10 +381,6 @@ plot_rolling_risk_contribution <- function(
     window_size,
     threshold
 ) {
-    data <-
-        data %>%
-        filter(type %outside% c("Benchmark", "Portfolio"))
-
     data <-
         data %>%
         group_by(asset) %>%

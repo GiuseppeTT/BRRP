@@ -32,11 +32,11 @@ Bonds {data-navmenu="Asset classes"}
 ================================================================================
 
 ```{r, include = FALSE}
-tar_load(base_bond_analysis)
+tar_load(bond_analysis)
 ```
 
 ```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "base_bond_analysis")
+load_template(params$base_analysis_template, analysis = "bond_analysis")
 ```
 
 
@@ -46,11 +46,11 @@ Equities {data-navmenu="Asset classes"}
 ================================================================================
 
 ```{r, include = FALSE}
-tar_load(base_equity_analysis)
+tar_load(equity_analysis)
 ```
 
 ```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "base_equity_analysis")
+load_template(params$base_analysis_template, analysis = "equity_analysis")
 ```
 
 
@@ -60,11 +60,11 @@ Multi-Asset Funds {data-navmenu="Asset classes"}
 ================================================================================
 
 ```{r, include = FALSE}
-tar_load(base_fund_analysis)
+tar_load(fund_analysis)
 ```
 
 ```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "base_fund_analysis")
+load_template(params$base_analysis_template, analysis = "fund_analysis")
 ```
 
 
@@ -74,15 +74,15 @@ Index Portfolio {data-navmenu="Theoretical Portfolios"}
 ================================================================================
 
 ```{r, include = FALSE}
-tar_load(base_index_analysis)
+tar_load(index_analysis)
 ```
 
 ```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "base_index_analysis")
+load_template(params$base_analysis_template, analysis = "index_analysis")
 ```
 
 ```{r, results = "asis"}
-load_template(params$portfolio_analysis_template, analysis = "base_index_analysis")
+load_template(params$portfolio_analysis_template, analysis = "index_analysis")
 ```
 
 
@@ -92,15 +92,15 @@ Index + Darius-Sigma Portfolio {data-navmenu="Theoretical Portfolios"}
 ================================================================================
 
 ```{r, include = FALSE}
-tar_load(base_index_darius_sigma_analysis)
+tar_load(index_darius_sigma_analysis)
 ```
 
 ```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "base_index_darius_sigma_analysis")
+load_template(params$base_analysis_template, analysis = "index_darius_sigma_analysis")
 ```
 
 ```{r, results = "asis"}
-load_template(params$portfolio_analysis_template, analysis = "base_index_darius_sigma_analysis")
+load_template(params$portfolio_analysis_template, analysis = "index_darius_sigma_analysis")
 ```
 
 
@@ -110,15 +110,15 @@ Index + Zarathustra-Sigma Portfolio {data-navmenu="Theoretical Portfolios"}
 ================================================================================
 
 ```{r, include = FALSE}
-tar_load(base_index_zarathustra_sigma_analysis)
+tar_load(index_zarathustra_sigma_analysis)
 ```
 
 ```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "base_index_zarathustra_sigma_analysis")
+load_template(params$base_analysis_template, analysis = "index_zarathustra_sigma_analysis")
 ```
 
 ```{r, results = "asis"}
-load_template(params$portfolio_analysis_template, analysis = "base_index_zarathustra_sigma_analysis")
+load_template(params$portfolio_analysis_template, analysis = "index_zarathustra_sigma_analysis")
 ```
 
 
