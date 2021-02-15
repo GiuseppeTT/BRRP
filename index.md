@@ -1,37 +1,37 @@
-## Welcome to GitHub Pages
+## Brazilian Risk Parity
 
-You can use the [editor on GitHub](https://github.com/GiuseppeTT/BRRP/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+### Introduction
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Hello and welcome to my implementation of risk parity to the Brazilian stock market. In this page, I will quickly explain to you what is risk parity, which assets we can use to implement it and what was the historical performance of this fascinating strategy.
 
-### Markdown
+### Risk parity
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+TODO.
 
-```markdown
-Syntax highlighted code block
+### Equity
 
-# Header 1
-## Header 2
-### Header 3
+TODO.
 
-- Bulleted
-- List
+### Bond
 
-1. Numbered
-2. List
+TODO.
 
-**Bold** and _Italic_ and `Code` text
+### REITS
 
-[Link](url) and ![Image](src)
-```
+TODO.
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+### Multi-asset fund
 
-### Jekyll Themes
+TODO.
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/GiuseppeTT/BRRP/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+### An index approach
 
-### Support or Contact
+TODO.
 
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+### An index + multi-asset fund approach
+
+TODO.
+
+### An investable approach
+
+TODO.
