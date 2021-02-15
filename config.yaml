@@ -1,0 +1,58 @@
+- name: "bond"
+  assets:
+    - "IMA"
+    - "IMA-S"
+    - "IMA-B"
+    - "IMA-B 5"
+    - "IMA-B 5+"
+    - "IMA-B 5 P2"
+    - "IRF-M"
+    - "IRF-M 1"
+    - "IRF-M 1+"
+    - "IRF-M P2"
+  benchmark: "CDI"
+
+- name: "equity"
+  assets:
+    - "IBrX 50"
+    - "Ibovespa"
+    - "IBrX"
+    - "IBrA"
+    - "IDIV"
+  benchmark: "CDI"
+
+- name: "multi-asset"
+  assets:
+    - "Giant Zarathustra + Sigma"
+    - "Giant Darius + Sigma"
+    - "Pandhora Essencial"
+  benchmark: "CDI"
+
+- name: "index"
+  assets:
+    - "IBrX"
+    - "IFIX"
+    - "IMA-B 5 P2"
+  benchmark: "CDI"
+  portfolio: "Index portfolio"
+  weights: "naive risk contribution"
+
+- name: "index-zarathustra-sigma"
+  assets:
+    - "IBrX"
+    - "IFIX"
+    - "IMA-B 5 P2"
+    - "Giant Zarathustra + Sigma"
+  benchmark: "CDI"
+  portfolio: "Index-Zarathustra-Sigma portfolio"
+  weights: "naive risk contribution"
+
+- name: "index-darius-sigma"
+  assets:
+    - "IBrX"
+    - "IFIX"
+    - "IMA-B 5 P2"
+    - "Giant Darius + Sigma"
+  benchmark: "CDI"
+  portfolio: "Index-Darius-Sigma portfolio"
+  weights: "naive risk contribution"

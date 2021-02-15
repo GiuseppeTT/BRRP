@@ -1,14 +1,6 @@
 analyze <- function(
-    data,
-    assets,
-    benchmark,
-    portfolio = NULL,
-    weights = NULL
+    data
 ) {
-    data <-
-        data %>%
-        prepare_data_for_analysis(assets, benchmark, portfolio, weights)
-
     results <-
         list()
 
@@ -58,10 +50,13 @@ analyze <- function(
         select(-type) %>%
         plot_dendogram()
 
-    if (!is.null(weights)) {
-        results$contains_portfolio <-
-            TRUE
+    results$contains_portfolio <-
+        data %>%
+        pull(type) %>%
+        magrittr::equals("Portfolio") %>%
+        any()
 
+    if (results$contains_portfolio) {
         results$rolling_year_risk_contribution_plot <-
             data %>%
             filter(type == "Simple asset") %>%
@@ -77,9 +72,6 @@ analyze <- function(
             filter(type == "Simple asset") %>%
             select(-type) %>%
             table_weights()
-    } else {
-        results$contains_portfolio <-
-            FALSE
     }
 
     return(results)

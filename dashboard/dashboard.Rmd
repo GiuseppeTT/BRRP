@@ -2,10 +2,11 @@
 title: "Brazilian Risk Parity"
 output: 
     flexdashboard::flex_dashboard:
-        social: menu
         orientation: rows
         vertical_layout: scroll
 params:
+    base_analysis_path: NULL
+    portfolio_analysis_path: NULL
     analysis: NULL
 ---
 
@@ -26,14 +27,10 @@ analysis <-
     params %>% 
     magrittr::extract2("analysis") %>% 
     magrittr::extract2(1)
-
-contains_portfolio <-
-    analysis %>% 
-    magrittr::extract2("contains_portfolio")
 ```
 
-```{r, child = "base-analysis.Rmd"}
+```{r, child = params$base_analysis_path}
 ```
 
-```{r, child = "portfolio-complement.Rmd", eval = contains_portfolio}
+```{r, child = params$portfolio_analysis_path, eval = analysis$contains_portfolio}
 ```

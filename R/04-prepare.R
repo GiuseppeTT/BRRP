@@ -1,15 +1,15 @@
 prepare_data_for_analysis <- function(
     data,
     assets,
-    benchmark = "CDI",
-    portfolio = NULL,
-    weights = NULL
+    benchmark,
+    portfolio = NA,
+    weights = NA
 ){
     data <-
         data %>%
         .filter_asset(c(benchmark, assets))
 
-    if (!is.null(portfolio) & !is.null(weights)) {
+    if (!is.na(portfolio) & !is.na(weights)) {
         portfolio_data <-
             data %>%
             filter(asset != benchmark) %>%
@@ -18,7 +18,7 @@ prepare_data_for_analysis <- function(
         data <-
             data %>%
             bind_rows(portfolio_data)
-    } else if (xor(!is.null(portfolio), !is.null(weights))) {
+    } else if (xor(!is.na(portfolio), !is.na(weights))) {
         stop("You must provide both or neither 'portfolio' and 'weights' arguments")
     }
 
@@ -27,7 +27,7 @@ prepare_data_for_analysis <- function(
         mutate(type = case_when(
             asset ==   benchmark                ~ "Benchmark",
             asset %in% assets                   ~ "Simple asset",
-            .false_if_empty(asset == portfolio) ~ "Portfolio"
+            .false_if_NA(asset == portfolio) ~ "Portfolio"
         )) %>%
         mutate(asset = factor(asset, levels = c(benchmark, assets, portfolio))) %>%
         mutate(type = factor(type, levels = c("Benchmark", "Simple asset", "Portfolio"))) %>%
@@ -157,11 +157,10 @@ prepare_data_for_analysis <- function(
         return()
 }
 
-.false_if_empty <- function(
+.false_if_NA <- function(
     x
 ) {
-    if (length(x) == 0)
-        return(FALSE)
-    else
-        return(x)
+    x %>%
+        magrittr::inset(is.na(x), FALSE) %>%
+        return()
 }

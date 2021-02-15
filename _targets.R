@@ -22,149 +22,78 @@ tar_option_set(packages = c("lubridate", "tidyverse"))
 
 
 # Targets ----------------------------------------------------------------------
-list(
-    # Data ---------------------------------------------------------------------
+config_targets <- list(
+    tar_file(
+        config_path,
+        here("config.yaml")
+    ),
     tar_target(
-        downloaded_assets,
+        config,
+        read_config(config_path)
+    )
+)
+
+data_targets <- list(
+    tar_target(
+        downloaded_data,
         download_data()
     ),
     tar_target(
-        complemented_assets,
-        complement_data(downloaded_assets)
-    ),
-    # Analysis -----------------------------------------------------------------
+        complemented_data,
+        complement_data(downloaded_data)
+    )
+)
+analysis_targets <- list(
     tar_target(
-        benchmark,
-        "CDI"
-    ),
-    ## Bonds -------------------------------------------------------------------
-    tar_target(
-        bonds,
-        c(
-            "IMA",
-            #"IMA-S",
-            "IMA-B",
-            #"IMA-B 5",
-            #"IMA-B 5+",
-            "IMA-B 5 P2",
-            "IRF-M",
-            #"IRF-M 1",
-            #"IRF-M 1+",
-            "IRF-M P2"
-        )
+        analysis_data,
+        prepare_data_for_analysis(
+            complemented_data,
+            config$assets[[1]],
+            config$benchmark,
+            config$portfolio,
+            config$weights
+        ),
+        pattern = map(config),
+        iteration = "list"
     ),
     tar_target(
-        bond_analysis,
-        analyze(complemented_assets, assets = bonds, benchmark = benchmark)
+        analysis,
+        analyze(analysis_data),
+        pattern = map(analysis_data),
+        iteration = "list"
+    )
+)
+
+dashboard_targets <- list(
+    tar_file(
+        base_analysis_path,
+        here("dashboard/base-analysis.Rmd")
     ),
-    ## Equities ----------------------------------------------------------------
-    tar_target(
-        equities,
-        c(
-            "IBrX 50",
-            "Ibovespa",
-            "IBrX",
-            "IBrA"#,
-            #"IDIV"
-        )
-    ),
-    tar_target(
-        equity_analysis,
-        analyze(complemented_assets, assets = equities, benchmark = benchmark)
-    ),
-    ## Funds -------------------------------------------------------------------
-    tar_target(
-        funds,
-        c(
-            "Giant Zarathustra + Sigma",
-            "Giant Darius + Sigma",
-            "Pandhora Essencial"
-        )
+    tar_file(
+        portfolio_analysis_path,
+        here("dashboard/portfolio-analysis.Rmd")
     ),
     tar_target(
-        fund_analysis,
-        analyze(complemented_assets, assets = funds, benchmark = benchmark)
+        output_file,
+        here("output", name_dashboard_file(config$name)),
+        pattern = map(config),
+        format = "file"
     ),
-    ## Index Portfolio ---------------------------------------------------------
-    tar_target(
-        indexes,
-        c(
-            "IBrX",
-            "IFIX",
-            "IMA-B 5 P2"
-        )
-    ),
-    tar_target(
-        index_analysis,
-        analyze(
-            complemented_assets,
-            assets = indexes,
-            benchmark = benchmark,
-            portfolio = "Index portfolio",
-            weights = "naive risk contribution"
-        )
-    ),
-    ## Index + Darius-Sigma Portfolio ------------------------------------------
-    tar_target(
-        indexes_darius_sigma,
-        c(
-            "IBrX",
-            "IFIX",
-            "IMA-B 5 P2",
-            "Giant Darius + Sigma"
-        )
-    ),
-    tar_target(
-        index_darius_sigma_analysis,
-        analyze(
-            complemented_assets,
-            assets = indexes_darius_sigma,
-            benchmark = benchmark,
-            portfolio = "Index + Darius-Sigma portfolio",
-            weights = "naive risk contribution"
-        )
-    ),
-    ## Index + Zarathustra-Sigma Portfolio -------------------------------------
-    tar_target(
-        indexes_zarathustra_sigma,
-        c(
-            "IBrX",
-            "IFIX",
-            "IMA-B 5 P2",
-            "Giant Zarathustra + Sigma"
-        )
-    ),
-    tar_target(
-        index_zarathustra_sigma_analysis,
-        analyze(
-            complemented_assets,
-            assets = indexes_zarathustra_sigma,
-            benchmark = benchmark,
-            portfolio = "Index + Zarathustra-Sigma portfolio",
-            weights = "naive risk contribution"
-        )
-    ),
-    # Dashboard ----------------------------------------------------------------
     tar_render_rep(
         dashboard,
         here("dashboard/dashboard.Rmd"),
         params = tibble::tibble(
-            analysis = list(
-                bond_analysis,
-                equity_analysis,
-                fund_analysis,
-                index_analysis,
-                index_darius_sigma_analysis,
-                index_zarathustra_sigma_analysis
-            ),
-            output_file = c(
-                here("dashboard/dashboard-bond.html"),
-                here("dashboard/dashboard-equity.html"),
-                here("dashboard/dashboard-fund.html"),
-                here("dashboard/dashboard-index.html"),
-                here("dashboard/dashboard-index-darius-sigma.html"),
-                here("dashboard/dashboard-index-zarathustra-sigma.html")
-            )
+            base_analysis_path = base_analysis_path,
+            portfolio_analysis_path = portfolio_analysis_path,
+            analysis = analysis,
+            output_file = output_file
         )
     )
+)
+
+list(
+    config_targets,
+    data_targets,
+    analysis_targets,
+    dashboard_targets
 )
