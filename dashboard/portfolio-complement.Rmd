@@ -3,22 +3,22 @@ Row {.tabset .tabset-fade}
 
 ### Rolling year risk contribution
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("rolling_year_risk_contribution_plot") %>% 
     plotly::ggplotly()
 ```
 
 ### Rolling quarter risk contribution
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("rolling_quarter_risk_contribution_plot") %>% 
     plotly::ggplotly()
 ```
 
 ### Weights
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("weights_table") %>% 
-    mutate(across(where(is.numeric), scales::percent, accuracy = 0.1)) %>%
+    percentage_columns() %>%
     knitr::kable()
 ```

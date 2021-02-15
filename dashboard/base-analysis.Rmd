@@ -3,9 +3,9 @@ Row
 
 ### Metrics
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("metric_table") %>% 
-    mutate(across(where(is.numeric), scales::percent, accuracy = 0.1)) %>%
+    percentage_columns() %>%
     knitr::kable()
 ```
 
@@ -15,14 +15,14 @@ Row
 
 ### Price
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("price_plot") %>% 
     plotly::ggplotly()
 ```
 
 ### Relative price
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("relative_price_plot") %>% 
     plotly::ggplotly()
 ```
@@ -33,38 +33,38 @@ Row {.tabset .tabset-fade}
 
 ### Rolling year return
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("rolling_year_return_plot") %>% 
     plotly::ggplotly()
 ```
 
 ### Year quantiles
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("rolling_year_return_table") %>%
-    mutate(across(where(is.numeric), scales::percent, accuracy = 0.1)) %>%
+    percentage_columns() %>%
     knitr::kable()
 ```
 
 ### Month quantiles
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("rolling_month_return_table") %>%
-    mutate(across(where(is.numeric), scales::percent, accuracy = 0.1)) %>%
+    percentage_columns() %>%
     knitr::kable()
 ```
 
 ### Week quantiles
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("rolling_week_return_table") %>% 
-    mutate(across(where(is.numeric), scales::percent, accuracy = 0.1)) %>%
+    percentage_columns() %>%
     knitr::kable()
 ```
 
 ### Drawdown
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("drawdown_plot") %>% 
     plotly::ggplotly()
 ```
@@ -75,15 +75,15 @@ Row
 
 ### Correlations
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("correlation_table") %>% 
-    mutate(across(where(is.numeric), scales::percent, accuracy = 0.1)) %>%
+    percentage_columns() %>%
     knitr::kable()
 ```
 
 ### Clustering
 ```{r}
-{{analysis}} %>% 
+analysis %>% 
     magrittr::extract2("dendogram_plot") %>% 
     plotly::ggplotly()
 ```

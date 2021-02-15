@@ -1,7 +1,19 @@
-# TODO: Include Fake imabp2, irfmp2, giant, quant
 complement_data <- function(
     data
 ) {
+    proxed_imab5p2_data <-
+        data %>%
+        .proxy_asset("IMA-B 5 P2", base = "IMA-B 5")
+
+    proxed_irfmp2_data <-
+        data %>%
+        .proxy_asset("IRF-M P2", base = "IRF-M")
+
+    data <-
+        data %>%
+        bind_rows(proxed_imab5p2_data, proxed_irfmp2_data) %>%
+        arrange(asset, date)
+
     extended_darius_data <-
         data %>%
         .extend_asset("Giant Darius", base = "Giant Zarathustra")
@@ -17,11 +29,11 @@ complement_data <- function(
 
     mix_darius_sigma_data <-
         data %>%
-        .mix_asset(c("Extended Giant Darius", "Extended Giant Sigma"))
+        .mix_asset(c("Giant Darius", "Giant Sigma"), name = "Giant Darius + Sigma")
 
     mix_zarathustra_sigma_data <-
         data %>%
-        .mix_asset(c("Giant Zarathustra", "Extended Giant Sigma"))
+        .mix_asset(c("Giant Zarathustra", "Giant Sigma"), name = "Giant Zarathustra + Sigma")
 
     data <-
         data %>%
@@ -29,6 +41,17 @@ complement_data <- function(
         arrange(asset, date)
 
     return(data)
+}
+
+.proxy_asset <- function(
+    data,
+    proxed,
+    base
+) {
+    data %>%
+        filter(asset == base) %>%
+        mutate(asset = proxed) %>%
+        return()
 }
 
 .extend_asset <- function(
@@ -66,11 +89,7 @@ complement_data <- function(
     extended_data <-
         data %>%
         filter(asset == extend) %>%
-        bind_rows(extended_data)
-
-    extended_data <-
-        extended_data %>%
-        mutate(asset = as.character(str_glue("Extended {extend}"))) %>%
+        bind_rows(extended_data) %>%
         arrange(date)
 
     return(extended_data)
@@ -79,6 +98,7 @@ complement_data <- function(
 .mix_asset <- function(
     data,
     assets,
+    name,
     weights = NULL
 ) {
     if (is.null(weights)) {
@@ -89,24 +109,11 @@ complement_data <- function(
     }
 
     data %>%
-        filter_asset(assets) %>%
+        .filter_asset(assets) %>%
         group_by(date) %>%
-        arrange(positionize(asset, by = names(weights))) %>%
+        arrange(.positionize(asset, by = names(weights))) %>%
         summarise(return = sum(weights * return)) %>%
-        mutate(asset = str_c(assets, collapse = " + ")) %>%
+        mutate(asset = name) %>%
         select(asset, date, return) %>%
         return()
 }
-
-# merge_asset <- function(
-#     data,
-#     assets,
-#     merge_name
-# ) {
-#     data %>%
-#         filter_asset(assets) %>%
-#         group_by(date) %>%
-#         summarise(return = mean(return)) %>%
-#         mutate(asset = merge_name, .before = everything()) %>%
-#         return()
-# }

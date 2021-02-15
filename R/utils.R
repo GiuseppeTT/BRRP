@@ -53,14 +53,3 @@ humanize_string <- function(
         if_else(. == str_to_upper(.), ., str_to_sentence(.)) %>%
         return()
 }
-
-time_diff_length <- function(
-    date,
-    unit = "second"
-) {
-    date %>%
-        range() %>%
-        diff() %>%
-        time_length(unit = unit) %>%
-        return()
-}

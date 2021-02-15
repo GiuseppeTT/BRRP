@@ -6,125 +6,34 @@ output:
         orientation: rows
         vertical_layout: scroll
 params:
-    base_analysis_template: NULL
-    portfolio_analysis_template: NULL
+    analysis: NULL
 ---
 
 ```{r setup, include = FALSE}
 library(tidyverse)
-
 library(targets)
 
-`%>%` <- magrittr::`%>%`
-
-load_template <- function(
-    path,
-    ...
+percentage_columns <- function(
+    data,
+    accuracy = 0.1
 ) {
-    path %>% 
-        knitr::knit_expand(...) %>% 
-        knitr::knit_child(text = ., quiet = TRUE) %>% 
-        cat(sep = "\n")
+    data %>% 
+        mutate(across(where(is.numeric), scales::percent, accuracy = accuracy)) %>%
+        return()
 }
+
+analysis <-
+    params %>% 
+    magrittr::extract2("analysis") %>% 
+    magrittr::extract2(1)
+
+contains_portfolio <-
+    analysis %>% 
+    magrittr::extract2("contains_portfolio")
 ```
 
-Bonds {data-navmenu="Asset classes"}
-================================================================================
-
-```{r, include = FALSE}
-tar_load(bond_analysis)
+```{r, child = "base-analysis.Rmd"}
 ```
 
-```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "bond_analysis")
+```{r, child = "portfolio-complement.Rmd", eval = contains_portfolio}
 ```
-
-
-
-
-Equities {data-navmenu="Asset classes"}
-================================================================================
-
-```{r, include = FALSE}
-tar_load(equity_analysis)
-```
-
-```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "equity_analysis")
-```
-
-
-
-
-Multi-Asset Funds {data-navmenu="Asset classes"}
-================================================================================
-
-```{r, include = FALSE}
-tar_load(fund_analysis)
-```
-
-```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "fund_analysis")
-```
-
-
-
-
-Index Portfolio {data-navmenu="Theoretical Portfolios"}
-================================================================================
-
-```{r, include = FALSE}
-tar_load(index_analysis)
-```
-
-```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "index_analysis")
-```
-
-```{r, results = "asis"}
-load_template(params$portfolio_analysis_template, analysis = "index_analysis")
-```
-
-
-
-
-Index + Darius-Sigma Portfolio {data-navmenu="Theoretical Portfolios"}
-================================================================================
-
-```{r, include = FALSE}
-tar_load(index_darius_sigma_analysis)
-```
-
-```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "index_darius_sigma_analysis")
-```
-
-```{r, results = "asis"}
-load_template(params$portfolio_analysis_template, analysis = "index_darius_sigma_analysis")
-```
-
-
-
-
-Index + Zarathustra-Sigma Portfolio {data-navmenu="Theoretical Portfolios"}
-================================================================================
-
-```{r, include = FALSE}
-tar_load(index_zarathustra_sigma_analysis)
-```
-
-```{r, results = "asis"}
-load_template(params$base_analysis_template, analysis = "index_zarathustra_sigma_analysis")
-```
-
-```{r, results = "asis"}
-load_template(params$portfolio_analysis_template, analysis = "index_zarathustra_sigma_analysis")
-```
-
-
-
-
-Investable Portfolio
-================================================================================
-
-TODO

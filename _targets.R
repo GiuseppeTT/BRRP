@@ -46,11 +46,11 @@ list(
             "IMA-B",
             #"IMA-B 5",
             #"IMA-B 5+",
-            "Fake IMA-B 5 P2",
+            "IMA-B 5 P2",
             "IRF-M",
             #"IRF-M 1",
             #"IRF-M 1+",
-            "Fake IRF-M P2"
+            "IRF-M P2"
         )
     ),
     tar_target(
@@ -76,8 +76,8 @@ list(
     tar_target(
         funds,
         c(
-            "Giant Zarathustra + Extended Giant Sigma",
-            "Extended Giant Darius + Extended Giant Sigma",
+            "Giant Zarathustra + Sigma",
+            "Giant Darius + Sigma",
             "Pandhora Essencial"
         )
     ),
@@ -91,7 +91,7 @@ list(
         c(
             "IBrX",
             "IFIX",
-            "Fake IMA-B 5 P2"
+            "IMA-B 5 P2"
         )
     ),
     tar_target(
@@ -110,8 +110,8 @@ list(
         c(
             "IBrX",
             "IFIX",
-            "Fake IMA-B 5 P2",
-            "Extended Giant Darius + Extended Giant Sigma"
+            "IMA-B 5 P2",
+            "Giant Darius + Sigma"
         )
     ),
     tar_target(
@@ -130,8 +130,8 @@ list(
         c(
             "IBrX",
             "IFIX",
-            "Fake IMA-B 5 P2",
-            "Giant Zarathustra + Extended Giant Sigma"
+            "IMA-B 5 P2",
+            "Giant Zarathustra + Sigma"
         )
     ),
     tar_target(
@@ -145,22 +145,26 @@ list(
         )
     ),
     # Dashboard ----------------------------------------------------------------
-    tar_target(
-        base_analysis_template,
-        here("dashboard/base-analysis-template.Rmd"),
-        format = "file"
-    ),
-    tar_target(
-        portfolio_analysis_template,
-        here("dashboard/portfolio-analysis-template.Rmd"),
-        format = "file"
-    ),
-    tar_render(
+    tar_render_rep(
         dashboard,
         here("dashboard/dashboard.Rmd"),
-        params = list(
-            base_analysis_template = base_analysis_template,
-            portfolio_analysis_template = portfolio_analysis_template
+        params = tibble::tibble(
+            analysis = list(
+                bond_analysis,
+                equity_analysis,
+                fund_analysis,
+                index_analysis,
+                index_darius_sigma_analysis,
+                index_zarathustra_sigma_analysis
+            ),
+            output_file = c(
+                here("dashboard/dashboard-bond.html"),
+                here("dashboard/dashboard-equity.html"),
+                here("dashboard/dashboard-fund.html"),
+                here("dashboard/dashboard-index.html"),
+                here("dashboard/dashboard-index-darius-sigma.html"),
+                here("dashboard/dashboard-index-zarathustra-sigma.html")
+            )
         )
     )
 )

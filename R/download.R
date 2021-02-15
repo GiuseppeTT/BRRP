@@ -16,7 +16,6 @@ download_data <- function(
 .download_BCB_data <- function(
     # Empty
 ) {
-    # TODO: move Fake to outside logic
     data_arguments <- tribble(
         ~name            , ~symbol    ,
         "IMA"            , "BCB/12469",
@@ -24,11 +23,9 @@ download_data <- function(
         "IMA-B"          , "BCB/12466",
         "IMA-B 5"        , "BCB/12467",
         "IMA-B 5+"       , "BCB/12468",
-        "Fake IMA-B 5 P2", "BCB/12467",  # IMA-B 5 is used as proxy for IMA-B 5 P2
         "IRF-M"          , "BCB/12461",
         "IRF-M 1"        , "BCB/17626",
         "IRF-M 1+"       , "BCB/17627",
-        "Fake IRF-M P2"  , "BCB/12461",  # IRF-M is used as proxy for IRF-M P2
     )
 
     data_arguments %>%
