@@ -2,7 +2,7 @@
 
 ### Introduction
 
-Hello and welcome to my implementation of risk parity to the Brazilian stock market. In this page, I will quickly explain to you what is risk parity, which assets we can use to implement it and what was the historical performance of this fascinating strategy.
+Hello and welcome to my implementation of risk parity to the Brazilian stock market. In this page, I will quickly explain to you what is risk parity, which assets we can use to implement it and what has been the historical performance of this fascinating strategy.
 
 ### Risk parity
 
@@ -10,27 +10,27 @@ TODO.
 
 ### Equity
 
-TODO.
+[Equity analysis link](https://giuseppett.github.io/BRRP/dashboard-equity).
 
 ### Bond
 
-TODO.
+[Bond analysis link](https://giuseppett.github.io/BRRP/dashboard-bond).
 
 ### REITS
 
 TODO.
 
-### Multi-asset fund
+### Multi-asset
 
-TODO.
+[Multi-asset analysis link](https://giuseppett.github.io/BRRP/dashboard-multi-asset).
 
 ### An index approach
 
-TODO.
+[Index analysis link](https://giuseppett.github.io/BRRP/dashboard-index).
 
-### An index + multi-asset fund approach
+### An index + multi-asset approach
 
-TODO.
+[Index analysis link](https://giuseppett.github.io/BRRP/dashboard-index-zarathustra-sigma).
 
 ### An investable approach
 
