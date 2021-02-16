@@ -1,0 +1,40 @@
+name: Pipeline
+
+on:
+  push:
+  workflow_dispatch:
+
+env:
+  RENV_PATHS_ROOT: ~/.local/share/renv
+
+jobs:
+  pipeline:
+    name: Run pipeline
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          submodules: 'recursive'
+          token: ${{ secrets.PAT }}
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v1
+
+      - name: Cache renv packages
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.RENV_PATHS_ROOT }}
+          key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-renv-
+            
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y libcurl4-openssl-dev
+          make dependencies
+
+      - name: Run pipeline
+        run: |
+          make pipeline
