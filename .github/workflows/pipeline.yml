@@ -38,5 +38,5 @@ jobs:
       - name: Commit generated dashboards
         uses: EndBug/add-and-commit@v7
         with:
-          add: "output/"
+          add: "docs/"
           message: "Auto commit: generated dashboards"
