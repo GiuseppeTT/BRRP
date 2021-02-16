@@ -14,9 +14,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          submodules: 'recursive'
-          token: ${{ secrets.PAT }}
 
       - name: Set up R
         uses: r-lib/actions/setup-r@v1
