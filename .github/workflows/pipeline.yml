@@ -11,7 +11,7 @@ jobs:
   pipeline:
     name: Run pipeline
     runs-on: ubuntu-latest
-    container: rocker:verse
+    container: rocker/verse
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
