@@ -35,3 +35,5 @@ jobs:
       - name: Run pipeline
         run: |
           make pipeline
+        env:
+          QUANDL_API_KEY: "{{ secrets.QUANDL_API_KEY }}"
