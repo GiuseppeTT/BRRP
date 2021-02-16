@@ -14,11 +14,7 @@ _debug.R
 _targets/
 
 # Input
-*.xlsx
 *.ZIP
-
-# Output
-*.html
 
 # TODO
 TODO.md
