@@ -30,7 +30,7 @@ TODO.
 
 ### An index + multi-asset approach
 
-[Index analysis link](https://giuseppett.github.io/BRRP/dashboard-index-zarathustra-sigma).
+[Index + multi-asset analysis link](https://giuseppett.github.io/BRRP/dashboard-index-zarathustra-sigma).
 
 ### An investable approach
 
