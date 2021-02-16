@@ -11,12 +11,10 @@ jobs:
   pipeline:
     name: Run pipeline
     runs-on: ubuntu-latest
+    container: rocker:verse
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-
-      - name: Set up R
-        uses: r-lib/actions/setup-r@v1
 
       - name: Cache renv packages
         uses: actions/cache@v2
@@ -25,11 +23,10 @@ jobs:
           key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
           restore-keys: |
             ${{ runner.os }}-renv-
-            
+
       - name: Install dependencies
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y libcurl4-openssl-dev
+          sudo apt-get upgrade -y
           make dependencies
 
       - name: Run pipeline
