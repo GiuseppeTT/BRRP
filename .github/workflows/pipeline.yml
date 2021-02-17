@@ -37,6 +37,9 @@ jobs:
         env:
           QUANDL_API_KEY: ${{ secrets.QUANDL_API_KEY }}
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Commit generated dashboards
         run: |
           git checkout origin/gh-pages
