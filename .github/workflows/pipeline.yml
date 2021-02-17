@@ -17,8 +17,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: Cache renv packages
         uses: actions/cache@v2
@@ -29,7 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sudo apt-get upgrade -y
+          apt-get update && apt-get install -y rsync  # necessary for github pages action
           make dependencies
 
       - name: Run pipeline
@@ -40,7 +38,6 @@ jobs:
 
       - name: Install rsync
         run: |
-          apt-get update && apt-get install -y rsync
 
       - name: Deploy GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.0.0
