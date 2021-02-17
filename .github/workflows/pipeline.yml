@@ -34,10 +34,13 @@ jobs:
 
       - name: Run pipeline
         run: |
-          mkdir -p output/dashboard/
           make pipeline
         env:
           QUANDL_API_KEY: ${{ secrets.QUANDL_API_KEY }}
+
+      - name: Install rsync
+        run: |
+          apt-get update && apt-get install -y rsync
 
       - name: Deploy GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.0.0
