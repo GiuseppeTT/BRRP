@@ -36,9 +36,6 @@ jobs:
         env:
           QUANDL_API_KEY: ${{ secrets.QUANDL_API_KEY }}
 
-      - name: Install rsync
-        run: |
-
       - name: Deploy GitHub Pages
         uses: JamesIves/github-pages-deploy-action@4.0.0
         with:
