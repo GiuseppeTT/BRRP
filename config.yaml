@@ -1,14 +1,14 @@
 - name: "bond"
   assets:
     - "IMA"
-    - "IMA-S"
+#    - "IMA-S"
     - "IMA-B"
-    - "IMA-B 5"
-    - "IMA-B 5+"
+#    - "IMA-B 5"
+#    - "IMA-B 5+"
     - "IMA-B 5 P2"
     - "IRF-M"
-    - "IRF-M 1"
-    - "IRF-M 1+"
+#    - "IRF-M 1"
+#    - "IRF-M 1+"
     - "IRF-M P2"
   benchmark: "CDI"
 
@@ -18,7 +18,7 @@
     - "Ibovespa"
     - "IBrX"
     - "IBrA"
-    - "IDIV"
+#    - "IDIV"
   benchmark: "CDI"
 
 - name: "multi-asset"
