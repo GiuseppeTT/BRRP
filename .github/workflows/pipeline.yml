@@ -25,6 +25,13 @@ jobs:
           key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
           restore-keys: ${{ runner.os }}-renv-
 
+      - name: Cache targets
+        uses: actions/cache@v2
+        with:
+          path: ./_targets
+          key: ${{ runner.os }}-targets-${{ hashFiles('./_targets.R') }}
+          restore-keys: ${{ runner.os }}-targets-
+
       - name: Install dependencies
         run: |
           apt-get update && apt-get install -y rsync  # necessary for github pages action
