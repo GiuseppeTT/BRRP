@@ -17,7 +17,11 @@ here("R/") %>%
 
 # Options ----------------------------------------------------------------------
 options(dplyr.summarise.inform = FALSE)
-tar_option_set(packages = c("lubridate", "tidyverse"))
+tar_option_set(
+    packages = c("lubridate", "tidyverse"),
+    memory = "transient",
+    garbage_collection = TRUE
+)
 
 
 
