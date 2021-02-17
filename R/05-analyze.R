@@ -36,7 +36,25 @@ analyze <- function(
         data %>%
         plot_drawdown()
 
-    # TODO: Create rolling relative return plot/tables
+    results$relative_rolling_year_return_plot <-
+        data %>%
+        plot_relative_rolling_return(days(365))
+
+    results$relative_rolling_year_return_table <-
+        data %>%
+        table_relative_rolling_return(days(365))
+
+    results$relative_rolling_month_return_table <-
+        data %>%
+        table_relative_rolling_return(days(30))
+
+    results$relative_rolling_week_return_table <-
+        data %>%
+        table_relative_rolling_return(days(7))
+
+    results$relative_drawdown_plot <-
+        data %>%
+        plot_relative_drawdown()
 
     results$correlation_table <-
         data %>%
@@ -229,6 +247,133 @@ plot_drawdown <- function(
     plot <-
         data %>%
         ggplot(aes(x = date, y = drawdown, color = asset)) +
+        geom_line(aes(size = type, linetype = type)) +
+        scale_y_continuous(labels = scales::percent) +
+        base_theme()
+
+    plot <-
+        plot %>%
+        humanize_labs()
+
+    return(plot)
+}
+
+plot_relative_rolling_return <- function(
+    data,
+    window_size
+) {
+    data <-
+        data %>%
+        complete(asset, date, fill = list(return = 0)) %>%
+        group_by(asset) %>%
+        mutate(type = if_else(is.na(type), .most_common(type), type)) %>%
+        ungroup()
+
+    data <-
+        data %>%
+        group_by(asset) %>%
+        mutate(rolling_return = rolling_return(return, date, window_size)) %>%
+        ungroup() %>%
+        drop_na()
+
+    benchmark_data <-
+        data %>%
+        filter(type == "Benchmark") %>%
+        select(date, benchmark_rolling_return = rolling_return)
+
+    data <-
+        data %>%
+        left_join(benchmark_data, by = "date") %>%
+        mutate(relative_rolling_return = rolling_return / benchmark_rolling_return)
+
+    plot <-
+        data %>%
+        ggplot(aes(x = date, y = relative_rolling_return, color = asset)) +
+        geom_line(aes(size = type, linetype = type)) +
+        scale_y_continuous(labels = scales::percent) +
+        base_theme()
+
+    plot <-
+        plot %>%
+        humanize_labs()
+
+    return(plot)
+}
+
+table_relative_rolling_return <- function(
+    data,
+    window_size,
+    probs = 0:10 / 10
+){
+    data <-
+        data %>%
+        complete(asset, date, fill = list(return = 0)) %>%
+        group_by(asset) %>%
+        mutate(type = if_else(is.na(type), .most_common(type), type)) %>%
+        ungroup()
+
+    data <-
+        data %>%
+        group_by(asset) %>%
+        mutate(rolling_return = rolling_return(return, date, window_size)) %>%
+        ungroup() %>%
+        drop_na()
+
+    benchmark_data <-
+        data %>%
+        filter(type == "Benchmark") %>%
+        select(date, benchmark_rolling_return = rolling_return)
+
+    data <-
+        data %>%
+        left_join(benchmark_data, by = "date") %>%
+        mutate(relative_rolling_return = rolling_return / benchmark_rolling_return)
+
+    data <-
+        data %>%
+        group_by(asset) %>%
+        summarise(as_tibble(quantile(relative_rolling_return, probs = probs, na.rm = T), rownames = "name")) %>%
+        ungroup() %>%
+        pivot_wider(names_from = name, values_from = value) %>%
+        humanize_column_names()
+
+    return(data)
+}
+
+plot_relative_drawdown <- function(
+    data
+) {
+    data <-
+        data %>%
+        complete(asset, date, fill = list(return = 0)) %>%
+        group_by(asset) %>%
+        mutate(type = if_else(is.na(type), .most_common(type), type)) %>%
+        ungroup()
+
+    data <-
+        data %>%
+        group_by(asset) %>%
+        mutate(price = cumprod(1 + return)) %>%
+        ungroup()
+
+    benchmark_data <-
+        data %>%
+        filter(type == "Benchmark") %>%
+        select(date, benchmark_price = price)
+
+    data <-
+        data %>%
+        left_join(benchmark_data, by = "date") %>%
+        mutate(relative_price = price / benchmark_price)
+
+    data <-
+        data %>%
+        group_by(asset) %>%
+        mutate(relative_drawdown = drawdown(relative_price))
+
+    plot <-
+        data %>%
+        ggplot(aes(x = date, y = relative_drawdown, color = asset)) +
         geom_line(aes(size = type, linetype = type)) +
         scale_y_continuous(labels = scales::percent) +
         base_theme()

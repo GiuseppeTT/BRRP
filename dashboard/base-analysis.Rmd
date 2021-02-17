@@ -70,6 +70,48 @@ analysis %>%
 ```
 
 
+Row {.tabset .tabset-fade}
+--------------------------------------------------------------------------------
+
+### Relative Rolling year return
+```{r}
+analysis %>% 
+    magrittr::extract2("relative_rolling_year_return_plot") %>% 
+    plotly::ggplotly()
+```
+
+### Relative Year quantiles
+```{r}
+analysis %>% 
+    magrittr::extract2("relative_rolling_year_return_table") %>%
+    percentage_columns() %>%
+    knitr::kable()
+```
+
+### Relative Month quantiles
+```{r}
+analysis %>% 
+    magrittr::extract2("relative_rolling_month_return_table") %>%
+    percentage_columns() %>%
+    knitr::kable()
+```
+
+### Relative Week quantiles
+```{r}
+analysis %>% 
+    magrittr::extract2("relative_rolling_week_return_table") %>% 
+    percentage_columns() %>%
+    knitr::kable()
+```
+
+### Relative Drawdown
+```{r}
+analysis %>% 
+    magrittr::extract2("relative_drawdown_plot") %>% 
+    plotly::ggplotly()
+```
+
+
 Row
 --------------------------------------------------------------------------------
 
