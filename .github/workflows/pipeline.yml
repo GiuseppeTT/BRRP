@@ -21,8 +21,7 @@ jobs:
         with:
           path: ${{ env.RENV_PATHS_ROOT }}
           key: ${{ runner.os }}-renv-${{ hashFiles('**/renv.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-renv-
+          restore-keys: ${{ runner.os }}-renv-
 
       - name: Install dependencies
         run: |
@@ -31,12 +30,15 @@ jobs:
 
       - name: Run pipeline
         run: |
+          mkdir -p output/dashboard/
           make pipeline
         env:
           QUANDL_API_KEY: ${{ secrets.QUANDL_API_KEY }}
-      
+
       - name: Commit generated dashboards
-        uses: EndBug/add-and-commit@v7
-        with:
-          add: "docs/"
-          message: "Auto commit: generated dashboards"
+        run: |
+          git checkout gh-pages
+          mv output/dashboard/ .
+          git add dashboard/
+          git commit -m "Auto commit: add generated dashboards"
+          git push origin gh-pages

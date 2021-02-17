@@ -1,7 +1,7 @@
 name_dashboard_file <- function(
     name
 ) {
-    "dashboard-{name}.html" %>%
+    "{name}.html" %>%
         glue::glue() %>%
         return()
 }

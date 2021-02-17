@@ -75,7 +75,7 @@ dashboard_targets <- list(
     ),
     tar_target(
         output_file,
-        here("docs", name_dashboard_file(config$name)),
+        here("output/dashboard", name_dashboard_file(config$name)),
         pattern = map(config)
     ),
     tar_render_rep(
