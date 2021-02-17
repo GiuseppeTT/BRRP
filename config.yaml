@@ -34,7 +34,6 @@
     - "IFIX"
     - "IMA-B 5 P2"
   benchmark: "CDI"
-  portfolio: "Index portfolio"
   weights: "naive risk contribution"
 
 - name: "index-zarathustra-sigma"
@@ -44,7 +43,6 @@
     - "IMA-B 5 P2"
     - "Giant Zarathustra + Sigma"
   benchmark: "CDI"
-  portfolio: "Index-Zarathustra-Sigma portfolio"
   weights: "naive risk contribution"
 
 - name: "index-darius-sigma"
@@ -54,5 +52,4 @@
     - "IMA-B 5 P2"
     - "Giant Darius + Sigma"
   benchmark: "CDI"
-  portfolio: "Index-Darius-Sigma portfolio"
   weights: "naive risk contribution"

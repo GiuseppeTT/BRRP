@@ -1,19 +1,25 @@
-Row {.tabset .tabset-fade}
+Weights
+================================================================================
+
+Column {.tabset .tabset-fade}
 --------------------------------------------------------------------------------
 
-### Rolling year risk contribution
+### Rolling year weight
 ```{r}
 analysis %>% 
-    magrittr::extract2("rolling_year_risk_contribution_plot") %>% 
+    magrittr::extract2("rolling_year_weight_plot") %>% 
     plotly::ggplotly()
 ```
 
-### Rolling quarter risk contribution
+### Rolling month weight
 ```{r}
 analysis %>% 
-    magrittr::extract2("rolling_quarter_risk_contribution_plot") %>% 
+    magrittr::extract2("rolling_month_weight_plot") %>% 
     plotly::ggplotly()
 ```
+
+Column
+--------------------------------------------------------------------------------
 
 ### Weights
 ```{r}

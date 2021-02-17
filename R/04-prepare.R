@@ -2,34 +2,31 @@ prepare_data_for_analysis <- function(
     data,
     assets,
     benchmark,
-    portfolio = NA,
     weights = NA
 ){
     data <-
         data %>%
         .filter_asset(c(benchmark, assets))
 
-    if (!is.na(portfolio) & !is.na(weights)) {
+    if (!is.na(weights)) {
         portfolio_data <-
             data %>%
             filter(asset != benchmark) %>%
-            .build_portfolio(portfolio, weights)
+            .build_portfolio(weights)
 
         data <-
             data %>%
             bind_rows(portfolio_data)
-    } else if (xor(!is.na(portfolio), !is.na(weights))) {
-        stop("You must provide both or neither 'portfolio' and 'weights' arguments")
     }
 
     data <-
         data %>%
         mutate(type = case_when(
-            asset ==   benchmark                ~ "Benchmark",
-            asset %in% assets                   ~ "Simple asset",
-            .false_if_NA(asset == portfolio) ~ "Portfolio"
+            asset ==   benchmark ~ "Benchmark",
+            asset %in% assets    ~ "Simple asset",
+            asset == "Portfolio" ~ "Portfolio"
         )) %>%
-        mutate(asset = factor(asset, levels = c(benchmark, assets, portfolio))) %>%
+        mutate(asset = factor(asset, levels = c(benchmark, assets, "Portfolio"))) %>%
         mutate(type = factor(type, levels = c("Benchmark", "Simple asset", "Portfolio"))) %>%
         select(type, asset, date, return) %>%
         arrange(type, asset, date)
@@ -68,7 +65,6 @@ prepare_data_for_analysis <- function(
 
 .build_portfolio <- function(
     data,
-    portfolio,
     weights
 ) {
     if (is.character(weights)) {
@@ -109,7 +105,7 @@ prepare_data_for_analysis <- function(
         summarise(portfolio_price = sum(weights * price)) %>%
         mutate(portfolio_return = portfolio_price / lag(portfolio_price) - 1) %>%
         slice(-1) %>%
-        mutate(asset = portfolio) %>%
+        mutate(asset = "Portfolio") %>%
         select(asset, date, return = portfolio_return)
 
     return(portfolio_data)
@@ -154,13 +150,5 @@ prepare_data_for_analysis <- function(
 ) {
     x %>%
         match(by) %>%
-        return()
-}
-
-.false_if_NA <- function(
-    x
-) {
-    x %>%
-        magrittr::inset(is.na(x), FALSE) %>%
         return()
 }

@@ -2,13 +2,18 @@
 title: "Brazilian Risk Parity"
 output: 
     flexdashboard::flex_dashboard:
-        orientation: rows
-        vertical_layout: scroll
+        orientation: columns
+        vertical_layout: fill
+        theme: flatly
 params:
     base_analysis_path: NULL
     portfolio_analysis_path: NULL
     analysis: NULL
 ---
+
+```{js}
+$('.navbar-inverse').removeClass('navbar-inverse').addClass('navbar-default');
+```
 
 ```{r setup, include = FALSE}
 library(tidyverse)

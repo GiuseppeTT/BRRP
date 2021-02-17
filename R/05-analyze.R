@@ -58,7 +58,7 @@ analyze <- function(
 
     results$correlation_table <-
         data %>%
-        filter(type == "Simple asset") %>%
+        filter(type != "Benchmark") %>%
         select(-type) %>%
         table_correlation()
 
@@ -75,15 +75,15 @@ analyze <- function(
         any()
 
     if (results$contains_portfolio) {
-        results$rolling_year_risk_contribution_plot <-
+        results$rolling_year_weight_plot <-
             data %>%
             filter(type == "Simple asset") %>%
-            plot_rolling_risk_contribution(days(365), threshold = 0.05)
+            plot_rolling_weight(days(365), threshold = 0.05)
 
-        results$rolling_quarter_risk_contribution_plot <-
+        results$rolling_month_weight_plot <-
             data %>%
             filter(type == "Simple asset") %>%
-            plot_rolling_risk_contribution(days(91), threshold = 0.05)
+            plot_rolling_weight(days(30), threshold = 0.05)
 
         results$weights_table <-
             data %>%
@@ -420,7 +420,7 @@ plot_dendogram <- function(
     return(plot)
 }
 
-plot_rolling_risk_contribution <- function(
+plot_rolling_weight <- function(
     data,
     window_size,
     threshold
@@ -433,14 +433,14 @@ plot_rolling_risk_contribution <- function(
     data <-
         data %>%
         group_by(date) %>%
-        mutate(rolling_risk_contribution = rolling_inverse_volatility / sum(rolling_inverse_volatility)) %>%
+        mutate(rolling_weight = rolling_inverse_volatility / sum(rolling_inverse_volatility)) %>%
         ungroup() %>%
-        mutate(rolling_risk_contribution = if_else(rolling_risk_contribution - lag(rolling_risk_contribution) > threshold, lag(rolling_risk_contribution), rolling_risk_contribution)) %>%
+        mutate(rolling_weight = if_else(rolling_weight - lag(rolling_weight) > threshold, lag(rolling_weight), rolling_weight)) %>%
         drop_na()
 
     plot <-
         data %>%
-        ggplot(aes(x = date, y = rolling_risk_contribution , color = asset)) +
+        ggplot(aes(x = date, y = rolling_weight , color = asset)) +
         geom_smooth(method = "lm", formula = y ~ 1, se = FALSE, linetype = "dashed") +
         geom_line(aes(size = type, linetype = type)) +
         scale_y_continuous(labels = scales::percent) +
@@ -451,17 +451,6 @@ plot_rolling_risk_contribution <- function(
         humanize_labs()
 
     return(plot)
-}
-
-table_risk_contribution <- function(
-    data
-) {
-    data %>%
-        group_by(asset) %>%
-        summarise(inverse_volatility = 1 / sd(return)) %>%
-        mutate(risk_contribution = inverse_volatility / sum(inverse_volatility)) %>%
-        select(asset, risk_contribution) %>%
-        return()
 }
 
 table_weights <- function(

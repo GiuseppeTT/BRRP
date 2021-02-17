@@ -54,7 +54,6 @@ analysis_targets <- list(
             complemented_data,
             config$assets[[1]],
             config$benchmark,
-            config$portfolio,
             config$weights
         ),
         pattern = map(config),
