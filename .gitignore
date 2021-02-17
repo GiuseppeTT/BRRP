@@ -4,17 +4,8 @@
 .RData
 .Ruserdata
 
-# Secret environment variables
-.Renviron
-
-# Debug
-_debug.R
-
-# Targets
+# Other
 _targets/
-
-# Input
-*.ZIP
-
-# TODO
+.Renviron
+_debug.R
 TODO.md
