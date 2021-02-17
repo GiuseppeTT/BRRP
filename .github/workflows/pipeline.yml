@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: Cache renv packages
         uses: actions/cache@v2
@@ -37,8 +39,8 @@ jobs:
         env:
           QUANDL_API_KEY: ${{ secrets.QUANDL_API_KEY }}
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+#      - name: Setup tmate session
+#        uses: mxschmitt/action-tmate@v3
 
       - name: Commit generated dashboards
         run: |
