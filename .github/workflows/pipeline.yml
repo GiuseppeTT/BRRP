@@ -45,7 +45,7 @@ jobs:
       - name: Commit generated dashboards
         run: |
           git checkout origin/gh-pages
-          mv output/dashboard/ .
+          mv --force output/dashboard/ .
           git add dashboard/
           git commit -m "Auto commit: add generated dashboards"
           git push origin gh-pages
